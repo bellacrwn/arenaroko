@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 432 112" role="img" aria-labelledby="title">
+  <title id="title">REKO monochrome light wordmark</title>
+  <g fill="#fff">
+    <path fill-rule="evenodd" d="M8 10h50c35 0 55 17 55 45 0 19-10 34-27 41l33 6H88L61 78H42v24H8V10zm34 28v22h17c13 0 20-3 20-11 0-8-7-11-20-11H42z"/>
+    <path d="M127 10h78v28h-44v6h40v24h-40v7h46v27h-80V10zM218 10h34v31l27-31h41l-39 43 42 49h-42l-29-35v35h-34V10z"/>
+    <circle cx="375" cy="56" r="46"/>
+  </g>
+  <g transform="translate(327 8)" fill="none" stroke="#1B4D3E" stroke-width="7" stroke-linecap="round"><path d="M26 29c11-9 29-9 40 0"/><path d="M72 41c4 13-2 29-14 36"/><path d="M43 80c-14-2-25-14-26-28"/></g>
+  <path fill="#1B4D3E" fill-rule="evenodd" d="M361 39h17c13 0 20 6 20 16 0 7-4 12-10 15l12 16h-13l-10-14h-3v14h-13V39zm13 10v13h4c5 0 7-2 7-7 0-4-2-6-7-6h-4z"/>
+</svg>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">REKO icon</title>
+  <desc id="desc">A pine green circular mark with a recycling loop and the letter R.</desc>
+  <circle cx="256" cy="256" r="248" fill="#1B4D3E"/>
+  <circle cx="256" cy="256" r="224" fill="none" stroke="#4A7C59" stroke-width="8"/>
+  <g fill="none" stroke="#22C55E" stroke-width="34" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M185 166c25-22 57-34 91-31 29 2 56 15 76 35"/>
+    <path d="M371 244c7 33 1 67-18 94-17 24-42 41-70 48"/>
+    <path d="M221 384c-32-9-59-29-75-59-14-26-18-56-11-84"/>
+  </g>
+  <g fill="#22C55E">
+    <path d="M349 125l44 62-75 8 19-24z"/>
+    <path d="M404 330l-74 7 31 68 10-28z"/>
+    <path d="M112 337l32-68 46 59-31-3z"/>
+  </g>
+  <path fill="#fff" fill-rule="evenodd" d="M205 190h66c50 0 79 24 79 65 0 28-14 49-39 59l48 64h-55l-39-55h-11v55h-49V190zm49 42v51h18c19 0 29-8 29-26 0-17-10-25-29-25h-18z"/>
+</svg>

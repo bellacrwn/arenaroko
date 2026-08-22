@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 432 112" role="img" aria-labelledby="title desc">
+  <title id="title">REKO wordmark</title>
+  <desc id="desc">The REKO name with a circular recycling mark.</desc>
+  <g fill="#1B4D3E">
+    <path fill-rule="evenodd" d="M8 10h50c35 0 55 17 55 45 0 19-10 34-27 41l33 6H88L61 78H42v24H8V10zm34 28v22h17c13 0 20-3 20-11 0-8-7-11-20-11H42z"/>
+    <path d="M127 10h78v28h-44v6h40v24h-40v7h46v27h-80V10z"/>
+    <path d="M218 10h34v31l27-31h41l-39 43 42 49h-42l-29-35v35h-34V10z"/>
+  </g>
+  <g transform="translate(327 8)">
+    <circle cx="48" cy="48" r="46" fill="#1B4D3E"/>
+    <g fill="none" stroke="#22C55E" stroke-width="7" stroke-linecap="round">
+      <path d="M26 29c11-9 29-9 40 0"/>
+      <path d="M72 41c4 13-2 29-14 36"/>
+      <path d="M43 80c-14-2-25-14-26-28"/>
+    </g>
+    <g fill="#22C55E"><path d="M65 20l13 15-20 3z"/><path d="M78 69l-19 2 8 17z"/><path d="M13 69l8-18 12 16z"/></g>
+    <path fill="#fff" fill-rule="evenodd" d="M34 31h17c13 0 20 6 20 16 0 7-4 12-10 15l12 16H60L50 64h-3v14H34V31zm13 10v13h4c5 0 7-2 7-7 0-4-2-6-7-6h-4z"/>
+  </g>
+</svg>
