@@ -252,7 +252,7 @@ function Landing() {
 
       <footer className="marketing-footer">
         <div className="container footer-grid"><div><Logo light /><p>Better value for your recyclables. Better outcomes for our communities.</p></div><div><b>Product</b><a href="#how">How it works</a><a href="#rates">Rates</a><Link to="/login">Drop stations</Link></div><div><b>Company</b><a href="#impact">Our impact</a><a href="#collectors">For collectors</a><a href="mailto:hello@reko.ng">Contact</a></div><div><b>Stay in the loop</b><p>Monthly rates and cleaner-living ideas.</p><label><input placeholder="Email address" /><button aria-label="Subscribe"><ArrowRight /></button></label></div></div>
-        <div className="footer-bottom container"><span>© 2026 REKO by WISEONE. Built for a circular Nigeria.</span><div><a href="#privacy">Privacy</a><a href="#terms">Terms</a><a href="#accessibility">Accessibility</a></div></div>
+        <div className="footer-bottom container"><span>issotope underdogs project</span><div><a href="#privacy">Privacy</a><a href="#terms">Terms</a><a href="#accessibility">Accessibility</a></div></div>
       </footer>
     </main>
   );
