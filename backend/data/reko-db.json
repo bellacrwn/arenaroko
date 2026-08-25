@@ -1,0 +1,259 @@
+{
+  "meta": {
+    "schemaVersion": 1,
+    "createdAt": "2026-08-25T20:56:27.309Z",
+    "updatedAt": "2026-08-25T20:56:27.735Z"
+  },
+  "users": [
+    {
+      "id": "c1fdae4c-1f17-41c6-85c0-f7f63461a114",
+      "role": "distributor",
+      "firstName": "User",
+      "lastName": "Ade",
+      "email": "distributor@reko.demo",
+      "phone": "+2348000000001",
+      "passwordHash": "$2b$12$hHIF12CrbdoHAeBrU0sh0uHQPNZ2CL9qmFoYPQHvxRjgcDr4Pi.LK",
+      "active": true,
+      "onboardingSource": "seed",
+      "createdAt": "2026-08-25T20:56:27.735Z",
+      "updatedAt": "2026-08-25T20:56:27.735Z"
+    },
+    {
+      "id": "6820162e-a910-4aae-8dc3-b0fc93a710e8",
+      "role": "collector",
+      "firstName": "Musa",
+      "lastName": "Adebayo",
+      "email": "collector@reko.demo",
+      "phone": "+2348000000002",
+      "businessName": "Musa Collection Services",
+      "passwordHash": "$2b$12$hHIF12CrbdoHAeBrU0sh0uHQPNZ2CL9qmFoYPQHvxRjgcDr4Pi.LK",
+      "active": true,
+      "onboardingSource": "seed",
+      "createdAt": "2026-08-25T20:56:27.735Z",
+      "updatedAt": "2026-08-25T20:56:27.735Z"
+    }
+  ],
+  "wallets": [
+    {
+      "id": "3b78dc95-1993-41af-8f17-375fb3c2ecb6",
+      "userId": "c1fdae4c-1f17-41c6-85c0-f7f63461a114",
+      "currency": "NGN",
+      "balance": 24560,
+      "availableBalance": 24560,
+      "provider": "wema",
+      "providerAccountLast4": "4072",
+      "createdAt": "2026-08-25T20:56:27.735Z",
+      "updatedAt": "2026-08-25T20:56:27.735Z"
+    },
+    {
+      "id": "eaeecc57-ad3d-4672-9851-2537193afdb7",
+      "userId": "6820162e-a910-4aae-8dc3-b0fc93a710e8",
+      "currency": "NGN",
+      "balance": 18740,
+      "availableBalance": 18740,
+      "provider": "wema",
+      "providerAccountLast4": "1189",
+      "createdAt": "2026-08-25T20:56:27.735Z",
+      "updatedAt": "2026-08-25T20:56:27.735Z"
+    }
+  ],
+  "transactions": [],
+  "pickups": [
+    {
+      "id": "8659a68c-f59b-4419-b862-78fbe60d01df",
+      "publicId": "RKO-387737",
+      "customerId": "c1fdae4c-1f17-41c6-85c0-f7f63461a114",
+      "collectorId": null,
+      "items": [
+        {
+          "materialId": "metal",
+          "estimatedWeight": 28,
+          "rateAtBooking": 210,
+          "estimatedPayout": 5880
+        }
+      ],
+      "address": {
+        "label": "Opebi, Ikeja",
+        "latitude": 6.5887,
+        "longitude": 3.3636
+      },
+      "pickupWindow": "Today · 2:00–4:00 PM",
+      "photos": [],
+      "customerNote": null,
+      "status": "pending",
+      "estimatedWeight": 28,
+      "estimatedPayout": 5880,
+      "collectorFee": 1250,
+      "createdAt": "2026-08-25T20:56:27.735Z",
+      "updatedAt": "2026-08-25T20:56:27.735Z"
+    },
+    {
+      "id": "a014adb9-ee53-424c-8391-8aa5c5015e80",
+      "publicId": "RKO-986920",
+      "customerId": "c1fdae4c-1f17-41c6-85c0-f7f63461a114",
+      "collectorId": null,
+      "items": [
+        {
+          "materialId": "plastic",
+          "estimatedWeight": 42,
+          "rateAtBooking": 130,
+          "estimatedPayout": 5460
+        }
+      ],
+      "address": {
+        "label": "Allen Avenue, Ikeja",
+        "latitude": 6.6018,
+        "longitude": 3.3515
+      },
+      "pickupWindow": "Today · 2:00–4:00 PM",
+      "photos": [],
+      "customerNote": null,
+      "status": "pending",
+      "estimatedWeight": 42,
+      "estimatedPayout": 5460,
+      "collectorFee": 1250,
+      "createdAt": "2026-08-25T20:56:27.735Z",
+      "updatedAt": "2026-08-25T20:56:27.735Z"
+    },
+    {
+      "id": "96692607-9a6f-4fda-9691-5064b5972c5e",
+      "publicId": "RKO-538283",
+      "customerId": "c1fdae4c-1f17-41c6-85c0-f7f63461a114",
+      "collectorId": null,
+      "items": [
+        {
+          "materialId": "ewaste",
+          "estimatedWeight": 16,
+          "rateAtBooking": 180,
+          "estimatedPayout": 2880
+        }
+      ],
+      "address": {
+        "label": "Maryland, Lagos",
+        "latitude": 6.5732,
+        "longitude": 3.3675
+      },
+      "pickupWindow": "Today · 2:00–4:00 PM",
+      "photos": [],
+      "customerNote": null,
+      "status": "pending",
+      "estimatedWeight": 16,
+      "estimatedPayout": 2880,
+      "collectorFee": 1250,
+      "createdAt": "2026-08-25T20:56:27.735Z",
+      "updatedAt": "2026-08-25T20:56:27.735Z"
+    }
+  ],
+  "wemaChallenges": [],
+  "notifications": [],
+  "auditLogs": [],
+  "materials": [
+    {
+      "id": "metal",
+      "name": "Metal",
+      "rate": 210,
+      "trend": 4.8,
+      "active": true,
+      "examples": "Aluminium, copper, steel and cans",
+      "updatedAt": "2026-08-25T20:56:27.309Z"
+    },
+    {
+      "id": "plastic",
+      "name": "Plastic",
+      "rate": 130,
+      "trend": 2.1,
+      "active": true,
+      "examples": "Clean PET bottles and containers",
+      "updatedAt": "2026-08-25T20:56:27.309Z"
+    },
+    {
+      "id": "ewaste",
+      "name": "E-waste",
+      "rate": 180,
+      "trend": 6.2,
+      "active": true,
+      "examples": "Cables, phones and small devices",
+      "updatedAt": "2026-08-25T20:56:27.309Z"
+    },
+    {
+      "id": "paper",
+      "name": "Paper",
+      "rate": 100,
+      "trend": -1.3,
+      "active": true,
+      "examples": "Cardboard, books and office paper",
+      "updatedAt": "2026-08-25T20:56:27.309Z"
+    },
+    {
+      "id": "mixed",
+      "name": "Mixed",
+      "rate": 80,
+      "trend": 1.4,
+      "active": true,
+      "examples": "Sorted household recyclables",
+      "updatedAt": "2026-08-25T20:56:27.309Z"
+    }
+  ],
+  "stations": [
+    {
+      "id": "station-ikeja",
+      "name": "REKO Ikeja Hub",
+      "area": "Allen Avenue, Ikeja",
+      "address": "44 Allen Avenue, Ikeja, Lagos",
+      "latitude": 6.6018,
+      "longitude": 3.3515,
+      "hours": "08:00-19:00",
+      "active": true,
+      "materials": [
+        "metal",
+        "plastic",
+        "paper"
+      ]
+    },
+    {
+      "id": "station-vi",
+      "name": "GreenPoint VI",
+      "area": "Victoria Island",
+      "address": "Akin Adesola Street, Victoria Island, Lagos",
+      "latitude": 6.4281,
+      "longitude": 3.4219,
+      "hours": "08:00-18:00",
+      "active": true,
+      "materials": [
+        "plastic",
+        "ewaste"
+      ]
+    },
+    {
+      "id": "station-opebi",
+      "name": "EcoDrop Opebi",
+      "area": "Opebi, Ikeja",
+      "address": "Opebi Road, Ikeja, Lagos",
+      "latitude": 6.5887,
+      "longitude": 3.3636,
+      "hours": "09:00-17:00",
+      "active": true,
+      "materials": [
+        "metal",
+        "paper"
+      ]
+    },
+    {
+      "id": "station-yaba",
+      "name": "Circular Lagos Yaba",
+      "area": "Yaba",
+      "address": "Herbert Macaulay Way, Yaba, Lagos",
+      "latitude": 6.5158,
+      "longitude": 3.3707,
+      "hours": "08:00-18:00",
+      "active": true,
+      "materials": [
+        "metal",
+        "plastic",
+        "ewaste",
+        "paper",
+        "mixed"
+      ]
+    }
+  ]
+}
