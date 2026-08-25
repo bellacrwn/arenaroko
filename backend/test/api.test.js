@@ -1,89 +1,43 @@
-import test, { after, before } from 'node:test';
+import test, { before } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
-import path from 'node:path';
 import request from 'supertest';
+import { distanceKm } from '../src/lib/geo.js';
 
-const testDatabase = path.resolve('data', `reko-test-${process.pid}.json`);
 process.env.NODE_ENV = 'test';
-process.env.DATA_FILE = testDatabase;
-process.env.JWT_SECRET = 'test-secret-with-at-least-thirty-two-characters';
+process.env.SUPABASE_URL ||= 'https://example.supabase.co';
+process.env.SUPABASE_ANON_KEY ||= 'test-anon-key';
+process.env.SUPABASE_SERVICE_ROLE_KEY ||= 'test-service-role-key';
 
 let app;
-let distributorToken;
-let collectorToken;
-let pickupId;
-
 before(async () => {
-  const { createApp } = await import('../src/app.js');
-  const { store } = await import('../src/db/store.js');
-  await store.reset();
-  app = await createApp();
+  const module = await import('../src/app.js');
+  app = await module.createApp();
 });
 
-after(async () => {
-  await fs.rm(testDatabase, { force: true });
-});
-
-test('health endpoint responds', async () => {
+test('health endpoint works without a database round trip', async () => {
   const response = await request(app).get('/health').expect(200);
   assert.equal(response.body.data.status, 'ok');
 });
 
-test('registers distributor and collector accounts', async () => {
-  const distributor = await request(app).post('/api/v1/auth/register').send({
-    role: 'distributor', firstName: 'Ada', lastName: 'Okafor', email: 'ada@example.com', phone: '+2348000000001', password: 'Secure123!'
-  }).expect(201);
-  distributorToken = distributor.body.data.accessToken;
-  assert.equal(distributor.body.data.user.role, 'distributor');
-
-  const collector = await request(app).post('/api/v1/auth/register').send({
-    role: 'collector', firstName: 'Musa', lastName: 'Adebayo', email: 'musa@example.com', phone: '+2348000000002', password: 'Secure123!', businessName: 'Musa Collections'
-  }).expect(201);
-  collectorToken = collector.body.data.accessToken;
-  assert.equal(collector.body.data.user.role, 'collector');
+test('request validation rejects malformed registration before Supabase', async () => {
+  const response = await request(app).post('/api/v1/auth/register').send({ email: 'invalid' }).expect(422);
+  assert.equal(response.body.error.code, 'VALIDATION_ERROR');
 });
 
-test('distributor creates a multi-material pickup', async () => {
-  const response = await request(app).post('/api/v1/pickups')
-    .set('Authorization', `Bearer ${distributorToken}`)
-    .send({
-      items: [{ materialId: 'metal', estimatedWeight: 20 }, { materialId: 'plastic', estimatedWeight: 10 }],
-      address: { label: 'Allen Avenue, Ikeja, Lagos', latitude: 6.6018, longitude: 3.3515 },
-      pickupWindow: 'Tomorrow · 9:00–11:00 AM'
-    }).expect(201);
-  pickupId = response.body.data.id;
-  assert.equal(response.body.data.items.length, 2);
-  assert.equal(response.body.data.status, 'pending');
+test('protected routes require a Supabase Bearer token', async () => {
+  const response = await request(app).get('/api/v1/pickups').expect(401);
+  assert.equal(response.body.error.code, 'AUTH_REQUIRED');
 });
 
-test('collector receives nearest order, accepts it, arrives, and approves payout', async () => {
-  const nearby = await request(app).get('/api/v1/collector/orders/nearby?latitude=6.6000&longitude=3.3500&radiusKm=8')
-    .set('Authorization', `Bearer ${collectorToken}`).expect(200);
-  assert.equal(nearby.body.data[0].id, pickupId);
-
-  await request(app).post(`/api/v1/collector/orders/${pickupId}/accept`)
-    .set('Authorization', `Bearer ${collectorToken}`)
-    .send({ latitude: 6.6000, longitude: 3.3500 }).expect(200);
-
-  await request(app).patch(`/api/v1/collector/orders/${pickupId}/status`)
-    .set('Authorization', `Bearer ${collectorToken}`).send({ status: 'en_route' }).expect(200);
-  await request(app).patch(`/api/v1/collector/orders/${pickupId}/status`)
-    .set('Authorization', `Bearer ${collectorToken}`).send({ status: 'arrived' }).expect(200);
-
-  const payout = await request(app).post(`/api/v1/collector/orders/${pickupId}/approve-payout`)
-    .set('Authorization', `Bearer ${collectorToken}`)
-    .send({ customerConfirmed: true, items: [
-      { materialId: 'metal', verifiedWeight: 21, quality: 'clean' },
-      { materialId: 'plastic', verifiedWeight: 9.5, quality: 'mixed' }
-    ] }).expect(200);
-  assert.equal(payout.body.data.pickup.status, 'paid');
-  assert.ok(payout.body.data.pickup.customerPayout > 0);
+test('distance helper calculates a realistic Lagos distance', () => {
+  const distance = distanceKm(6.6018, 3.3515, 6.5887, 3.3636);
+  assert.ok(distance > 1 && distance < 3);
 });
 
-test('credits customer payout and collector fee wallets', async () => {
-  const customerWallet = await request(app).get('/api/v1/wallet').set('Authorization', `Bearer ${distributorToken}`).expect(200);
-  const collectorWallet = await request(app).get('/api/v1/wallet').set('Authorization', `Bearer ${collectorToken}`).expect(200);
-  assert.ok(customerWallet.body.data.availableBalance > 0);
-  assert.ok(collectorWallet.body.data.availableBalance > 0);
+test('Supabase migration contains financial functions, RLS, storage, and realtime', async () => {
+  const first = await fs.readFile(new URL('../supabase/migrations/202608260001_initial_schema.sql', import.meta.url), 'utf8');
+  const second = await fs.readFile(new URL('../supabase/migrations/202608260002_api_functions.sql', import.meta.url), 'utf8');
+  for (const expected of ['enable row level security', 'approve_pickup_payout', 'pickup-photos', 'supabase_realtime']) assert.ok(first.includes(expected));
+  for (const expected of ['create_pickup', 'cancel_pickup', 'create_wallet_withdrawal']) assert.ok(second.includes(expected));
 });

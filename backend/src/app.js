@@ -5,7 +5,6 @@ import rateLimit from 'express-rate-limit';
 import morgan from 'morgan';
 import { randomUUID } from 'node:crypto';
 import { config } from './config.js';
-import { store } from './db/store.js';
 import authRoutes from './routes/auth.js';
 import catalogRoutes from './routes/catalog.js';
 import pickupRoutes from './routes/pickups.js';
@@ -16,7 +15,6 @@ import notificationRoutes from './routes/notifications.js';
 import { errorHandler, notFound } from './middleware/errors.js';
 
 export async function createApp() {
-  await store.initialize();
   const app = express();
   app.disable('x-powered-by');
   app.use((request, response, next) => { request.id = request.headers['x-request-id'] || randomUUID(); response.setHeader('x-request-id', request.id); next(); });

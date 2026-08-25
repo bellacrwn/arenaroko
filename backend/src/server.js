@@ -1,14 +1,13 @@
 import { createServer } from 'node:http';
 import { createApp } from './app.js';
-import { config, validateProductionConfig } from './config.js';
+import { config, validateConfig } from './config.js';
 
-validateProductionConfig();
+validateConfig();
 const app = await createApp();
 const server = createServer(app);
 
 server.listen(config.port, '0.0.0.0', () => {
-  console.log(`REKO API listening on http://0.0.0.0:${config.port}${config.apiPrefix}`);
-  if (!config.isProduction && config.jwtSecret === 'development-only-change-this-secret') console.warn('Using the development JWT secret. Set JWT_SECRET before deployment.');
+  console.log(`REKO Supabase API listening on http://0.0.0.0:${config.port}${config.apiPrefix}`);
 });
 
 function shutdown(signal) {

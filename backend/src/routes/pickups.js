@@ -1,90 +1,69 @@
 import { Router } from 'express';
+import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
-import { store } from '../db/store.js';
-import { id, publicPickupId } from '../lib/ids.js';
-import { addAudit, materialMap } from '../lib/entities.js';
 import { asyncRoute } from '../lib/async-route.js';
 import { allowRoles, authenticate } from '../middleware/auth.js';
 import { ApiError } from '../middleware/errors.js';
 import { validate } from '../middleware/validate.js';
+import { config } from '../config.js';
+import { supabaseAdmin, assertSupabase } from '../supabase.js';
 
 const router = Router();
 router.use(authenticate);
 
 const itemSchema = z.object({ materialId: z.string().min(1), estimatedWeight: z.coerce.number().positive().max(10000) });
-const addressSchema = z.object({
-  label: z.string().min(5).max(250),
-  latitude: z.number().min(-90).max(90),
-  longitude: z.number().min(-180).max(180),
-  notes: z.string().max(500).optional(),
-});
 const createSchema = z.object({
   items: z.array(itemSchema).min(1).max(10),
-  address: addressSchema,
-  pickupWindow: z.string().min(5).max(120),
-  photos: z.array(z.string().url()).max(8).default([]),
-  customerNote: z.string().max(500).optional(),
+  address: z.object({ label: z.string().min(5).max(250), latitude: z.number().min(-90).max(90), longitude: z.number().min(-180).max(180), notes: z.string().max(500).optional() }),
+  pickupWindow: z.string().min(5).max(120), photoPaths: z.array(z.string().max(500)).max(8).default([]), customerNote: z.string().max(500).optional(),
 });
 
-function decorate(pickup, database) {
-  const lookup = materialMap(database);
-  return { ...pickup, items: pickup.items.map((item) => ({ ...item, material: lookup.get(item.materialId) || null })) };
-}
+router.post('/photos/upload-url', allowRoles('distributor'), validate(z.object({ fileName: z.string().min(1).max(150), contentType: z.enum(['image/jpeg','image/png','image/webp']) })), asyncRoute(async (request, response) => {
+  const extension = request.validated.body.fileName.split('.').pop()?.toLowerCase() || 'jpg';
+  const path = `${request.auth.user.id}/${randomUUID()}.${extension}`;
+  const data = assertSupabase(await supabaseAdmin.storage.from(config.supabase.storageBucket).createSignedUploadUrl(path));
+  response.status(201).json({ success: true, data: { ...data, path, bucket: config.supabase.storageBucket, contentType: request.validated.body.contentType } });
+}));
 
 router.post('/', allowRoles('distributor'), validate(createSchema), asyncRoute(async (request, response) => {
   const input = request.validated.body;
-  const pickup = await store.transaction((database) => {
-    const lookup = materialMap(database);
-    const items = input.items.map((item) => {
-      const material = lookup.get(item.materialId);
-      if (!material?.active) throw new ApiError(422, 'INVALID_MATERIAL', `Material ${item.materialId} is not available.`);
-      return { ...item, rateAtBooking: material.rate, estimatedPayout: Math.round(item.estimatedWeight * material.rate) };
-    });
-    const now = new Date().toISOString();
-    const entity = {
-      id: id(), publicId: publicPickupId(), customerId: request.auth.user.id, collectorId: null,
-      items, address: input.address, pickupWindow: input.pickupWindow, photos: input.photos,
-      customerNote: input.customerNote || null, status: 'pending',
-      estimatedWeight: items.reduce((sum, item) => sum + item.estimatedWeight, 0),
-      estimatedPayout: items.reduce((sum, item) => sum + item.estimatedPayout, 0),
-      collectorFee: 1000 + items.length * 250, createdAt: now, updatedAt: now,
-    };
-    database.pickups.push(entity);
-    database.notifications.push({ id: id(), userId: entity.customerId, type: 'pickup_created', title: 'Pickup requested', message: `${entity.publicId} is waiting for a collector.`, read: false, createdAt: now });
-    addAudit(database, 'pickup.created', request.auth.user.id, 'pickup', entity.id, { itemCount: items.length });
-    return decorate(entity, database);
-  });
-  response.status(201).json({ success: true, data: pickup });
+  const data = assertSupabase(await supabaseAdmin.rpc('create_pickup', {
+    p_customer_id: request.auth.user.id,
+    p_address: input.address,
+    p_pickup_window: input.pickupWindow,
+    p_photo_paths: input.photoPaths,
+    p_customer_note: input.customerNote || null,
+    p_items: input.items,
+  }));
+  response.status(201).json({ success: true, data });
 }));
 
 router.get('/', validate(z.object({ status: z.string().optional(), limit: z.coerce.number().int().min(1).max(100).default(30) }), 'query'), asyncRoute(async (request, response) => {
   const query = request.validated.query;
-  const database = await store.snapshot();
-  let pickups = database.pickups.filter((pickup) => request.auth.user.role === 'collector' ? pickup.collectorId === request.auth.user.id : pickup.customerId === request.auth.user.id);
-  if (query.status) pickups = pickups.filter((pickup) => pickup.status === query.status);
-  pickups = pickups.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, query.limit).map((pickup) => decorate(pickup, database));
-  response.json({ success: true, data: pickups });
+  let builder = supabaseAdmin.from('pickups').select('*, pickup_items(*, material:materials(*))')
+    .eq(request.auth.user.role === 'collector' ? 'collector_id' : 'customer_id', request.auth.user.id)
+    .order('created_at', { ascending: false }).limit(query.limit);
+  if (query.status) builder = builder.eq('status', query.status);
+  response.json({ success: true, data: assertSupabase(await builder) });
 }));
 
 router.get('/:pickupId', asyncRoute(async (request, response) => {
-  const database = await store.snapshot();
-  const pickup = database.pickups.find((item) => item.id === request.params.pickupId || item.publicId === request.params.pickupId);
-  if (!pickup) throw new ApiError(404, 'PICKUP_NOT_FOUND', 'The pickup could not be found.');
-  const allowed = pickup.customerId === request.auth.user.id || pickup.collectorId === request.auth.user.id;
-  if (!allowed) throw new ApiError(403, 'FORBIDDEN', 'You cannot view this pickup.');
-  response.json({ success: true, data: decorate(pickup, database) });
+  const value = request.params.pickupId;
+  let builder = supabaseAdmin.from('pickups').select('*, pickup_items(*, material:materials(*))');
+  builder = value.startsWith('RKO-') ? builder.eq('public_id', value) : builder.eq('id', value);
+  const pickup = assertSupabase(await builder.single());
+  if (pickup.customer_id !== request.auth.user.id && pickup.collector_id !== request.auth.user.id) throw new ApiError(403, 'FORBIDDEN', 'You cannot view this pickup.');
+  response.json({ success: true, data: pickup });
 }));
 
 router.post('/:pickupId/cancel', allowRoles('distributor'), asyncRoute(async (request, response) => {
-  const pickup = await store.transaction((database) => {
-    const entity = database.pickups.find((item) => item.id === request.params.pickupId || item.publicId === request.params.pickupId);
-    if (!entity || entity.customerId !== request.auth.user.id) throw new ApiError(404, 'PICKUP_NOT_FOUND', 'The pickup could not be found.');
-    if (!['pending', 'accepted'].includes(entity.status)) throw new ApiError(409, 'CANNOT_CANCEL', 'This pickup has progressed too far to cancel.');
-    entity.status = 'cancelled'; entity.cancelledAt = new Date().toISOString(); entity.updatedAt = entity.cancelledAt;
-    addAudit(database, 'pickup.cancelled', request.auth.user.id, 'pickup', entity.id);
-    return decorate(entity, database);
-  });
-  response.json({ success: true, data: pickup });
+  let pickupId = request.params.pickupId;
+  if (pickupId.startsWith('RKO-')) {
+    const pickup = assertSupabase(await supabaseAdmin.from('pickups').select('id').eq('public_id', pickupId).single());
+    pickupId = pickup.id;
+  }
+  const data = assertSupabase(await supabaseAdmin.rpc('cancel_pickup', { p_pickup_id: pickupId, p_customer_id: request.auth.user.id }));
+  response.json({ success: true, data });
 }));
 
 export default router;
