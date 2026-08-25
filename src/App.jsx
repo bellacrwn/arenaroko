@@ -73,6 +73,7 @@ import {
   NearbyOrdersPage,
 } from './CollectorApp';
 import LogoutDialog from './LogoutDialog';
+import { apiRequest, saveSession } from './api';
 import { Signup, WelcomeTour } from './Signup';
 import {
   Link,
@@ -265,6 +266,29 @@ function Login() {
   const [role, setRole] = useState(initialCollector ? 'collector' : 'distributor');
   const [mode, setMode] = useState('email');
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    setError('');
+    if (mode !== 'email') {
+      setError('Phone login is not available yet. Please use your email address.');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const result = await apiRequest('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
+      saveSession(result.data);
+      navigate(result.data.user.role === 'collector' ? '/collector' : '/app');
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
     <main className="login-page">
@@ -281,11 +305,12 @@ function Login() {
           <h1>{role === 'collector' ? 'Manage your routes.' : 'Good to see you again.'}</h1>
           <p>{role === 'collector' ? 'Sign in to view requests, routes, and earnings.' : 'Sign in to continue your recycling journey.'}</p>
           <div className="login-tabs"><button className={mode === 'email' ? 'active' : ''} onClick={() => setMode('email')}><Mail /> Email</button><button className={mode === 'phone' ? 'active' : ''} onClick={() => setMode('phone')}><Phone /> Phone</button></div>
-          <form onSubmit={(event) => { event.preventDefault(); navigate(role === 'collector' ? '/collector' : '/app'); }}>
-            <label><span>{mode === 'email' ? 'Email address' : 'Phone number'}</span><div className="form-control">{mode === 'email' ? <Mail /> : <Phone />}<input required type={mode === 'email' ? 'email' : 'tel'} placeholder={mode === 'email' ? 'you@example.com' : '+234 800 000 0000'} /></div></label>
-            <label><span>Password</span><div className="form-control"><LockKeyhole /><input required minLength="6" type={showPassword ? 'text' : 'password'} placeholder="Enter your password" /><button type="button" onClick={() => setShowPassword(!showPassword)} aria-label="Toggle password visibility">{showPassword ? <EyeOff /> : <Eye />}</button></div></label>
+          <form onSubmit={handleSubmit}>
+            <label><span>{mode === 'email' ? 'Email address' : 'Phone number'}</span><div className="form-control">{mode === 'email' ? <Mail /> : <Phone />}<input required type={mode === 'email' ? 'email' : 'tel'} placeholder={mode === 'email' ? 'you@example.com' : '+234 800 000 0000'} value={email} onChange={(event) => setEmail(event.target.value)} /></div></label>
+            <label><span>Password</span><div className="form-control"><LockKeyhole /><input required minLength="8" type={showPassword ? 'text' : 'password'} placeholder="Enter your password" value={password} onChange={(event) => setPassword(event.target.value)} /><button type="button" onClick={() => setShowPassword(!showPassword)} aria-label="Toggle password visibility">{showPassword ? <EyeOff /> : <Eye />}</button></div></label>
             <div className="login-options"><label className="checkbox"><input type="checkbox" defaultChecked /> Keep me signed in</label><button type="button">Forgot password?</button></div>
-            <button className="btn btn--pine btn--full btn--xl">Sign in securely <ArrowRight /></button>
+            {error && <p role="alert" className="login-error">{error}</p>}
+            <button className="btn btn--pine btn--full btn--xl" disabled={submitting}>{submitting ? 'Signing in...' : 'Sign in securely'} <ArrowRight /></button>
           </form>
           <div className="or-divider"><span>or</span></div>
           <button className="google-login"><b>G</b> Continue with Google</button>
